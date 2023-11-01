@@ -1,11 +1,14 @@
 package com.example.taskcdp.di
 
 import android.content.Context
+import androidx.room.Room
 import com.example.taskcdp.domain.AuthImpl
 import com.example.taskcdp.BuildConfig
 import com.example.taskcdp.util.SessionManager
 import com.example.taskcdp.data.ApiService
+import com.example.taskcdp.data.local.AppDatabase
 import com.example.taskcdp.data.AuthRepository
+import com.example.taskcdp.data.local.dao.UserProfileDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,6 +26,22 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+    @Provides
+    @Singleton
+    fun provideAppDatabase(@ApplicationContext appContext: Context): AppDatabase {
+        return Room.databaseBuilder(
+            appContext,
+            AppDatabase::class.java,
+            "app_database"
+        ).build()
+    }
+
+
+    @Provides
+    fun provideCartDao(database: AppDatabase): UserProfileDao {
+        return database.userProfileDao()
+    }
 
     @Provides
     @Singleton
