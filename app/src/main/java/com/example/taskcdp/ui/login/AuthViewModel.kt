@@ -1,16 +1,13 @@
 package com.example.taskcdp.ui.login
 
 import Resource
-import androidx.lifecycle.ViewModel
-import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.taskcdp.R
 import com.example.taskcdp.data.AuthRepository
 import com.example.taskcdp.data.model.LoginRequest
 import com.example.taskcdp.data.model.Responses
-
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,10 +35,6 @@ class AuthViewModel @Inject constructor(
     private val _loginState = MutableStateFlow(LoginResponse(Responses.LoginUserDataResponse()))
     var loginState: StateFlow<LoginResponse> = _loginState.asStateFlow()
 
-    private val _uiEvent = Channel<String>()
-    val uiEvent = _uiEvent.receiveAsFlow()
-
-
     fun login(loginRequest: LoginRequest) {
         _loginState.update { it.copy(loading = true) }
 
@@ -65,7 +58,6 @@ class AuthViewModel @Inject constructor(
                                 error = result.message ?: "Something went wrong"
                             )
                         }
-                        _uiEvent.send(result.message ?: "Something went wrong")
                     }
 
                     is Resource.Loading -> {

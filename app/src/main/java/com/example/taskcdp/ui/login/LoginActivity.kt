@@ -2,24 +2,21 @@ package com.example.taskcdp.ui.login
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.annotation.StringRes
-import androidx.appcompat.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.findNavController
 import com.example.taskcdp.R
 import com.example.taskcdp.data.model.LoginRequest
 import com.example.taskcdp.databinding.ActivityLoginBinding
 import com.example.taskcdp.ui.profile.MainActivity
-
-import com.example.taskcdp.util.SessionManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import timber.log.Timber
