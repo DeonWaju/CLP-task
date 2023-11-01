@@ -14,7 +14,7 @@ android {
     defaultConfig {
         applicationId = "com.example.taskcdp"
         minSdk = 24
-        targetSdk = 33
+        targetSdk = 31
         versionCode = 1
         versionName = "1.0"
 
@@ -108,6 +108,8 @@ dependencies {
     //SecurePreference
     implementation("androidx.security:security-crypto:1.1.0-alpha03")
 
+    //Easy Permissions
+    implementation("pub.devrel:easypermissions:3.0.0")
 
     //Glide
     implementation("com.github.bumptech.glide:glide:4.12.0")

@@ -1,5 +1,6 @@
 package com.example.taskcdp.data.repo
 
+import Constants.SOMETHING_WRONG
 import Resource
 import com.example.taskcdp.di.AppDispatchers
 import com.example.taskcdp.di.Dispatcher
@@ -25,7 +26,7 @@ class AuthImpl @Inject constructor(
         val remoteData = try {
             api.login(loginRequest)
         } catch (e: Exception){
-            emit(Resource.Error(message = e.message ?: "Something went wrong, Please check your network..."))
+            emit(Resource.Error(message = e.message ?: SOMETHING_WRONG))
             null
         }
 
@@ -47,8 +48,4 @@ class AuthImpl @Inject constructor(
     override fun clearLoginDetails() = sessionManager.clearLoginDetails()
 
     override fun clearAllData() = sessionManager.clearData()
-
-    override suspend fun login(username: String, password: String) {
-        TODO("Not yet implemented")
-    }
 }

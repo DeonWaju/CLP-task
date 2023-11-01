@@ -52,16 +52,6 @@ class SessionManager(context: Context) {
         }
     }
 
-    fun saveToken(token: String?) {
-        sharedPreferences.edit {
-            putString(KEY_TOKEN, token)
-        }
-    }
-
-    fun getToken(): String? {
-        return sharedPreferences.getString(KEY_TOKEN, null)
-    }
-
     fun clearData() {
         sharedPreferences.edit().clear().apply()
     }

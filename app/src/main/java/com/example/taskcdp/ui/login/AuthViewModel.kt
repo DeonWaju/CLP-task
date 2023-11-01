@@ -101,15 +101,7 @@ class AuthViewModel @Inject constructor(
     fun userIsAuthenticated(): Boolean =
         authRepository.userIsAuthenticated()
 
-
-    fun getIsRememberButtonCheck() = authRepository.getRememberUser()
-
-    fun saveIsRememberButtonCheck(isRememberButtonClicked: Boolean) =
-        authRepository.saveRememberUser(isRememberButtonClicked)
-
     fun clearLoginDetails() = authRepository.clearLoginDetails()
-
-    fun clearAllData() = authRepository.clearAllData()
 
     fun isUserNameValid(username: String): Boolean {
         return username.length > 3
@@ -118,4 +110,6 @@ class AuthViewModel @Inject constructor(
     fun isPasswordValid(password: String): Boolean {
         return password.length > 5
     }
+
+    fun clearAllData() = authRepository.clearAllData()
 }

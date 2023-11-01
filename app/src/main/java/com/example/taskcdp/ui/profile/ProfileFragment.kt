@@ -2,10 +2,12 @@ package com.example.taskcdp.ui.profile
 
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -32,6 +34,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.io.OutputStream
 
 /**
@@ -39,7 +42,7 @@ import java.io.OutputStream
  */
 
 @AndroidEntryPoint
-class FirstFragment : Fragment() {
+class ProfileFragment : Fragment() {
 
     private var _binding: FragmentFirstBinding? = null
 
@@ -49,9 +52,6 @@ class FirstFragment : Fragment() {
     private var id: Int = -1
     private var image: String = ""
 
-    // Code to open the camera or gallery
-    private val REQUEST_IMAGE_CAPTURE = 1
-    private val REQUEST_IMAGE_PICK = 2
     private val REQUEST_CAMERA_PERMISSION_CODE = 3
     private val REQUEST_STORAGE_PERMISSION_CODE = 4
 
@@ -59,7 +59,6 @@ class FirstFragment : Fragment() {
 
     private lateinit var takePictureLauncher: ActivityResultLauncher<Intent>
     private lateinit var pickPictureLauncher: ActivityResultLauncher<Intent>
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -89,13 +88,13 @@ class FirstFragment : Fragment() {
                             }
 
                             binding.tvEmail.text = buildString {
-                             append(getString(R.string.email))
-                             append(it.email)
+                                append(getString(R.string.email))
+                                append(it.email)
                             }
 
                             profileViewModel.updateProfileImage(id, image)
 
-                            Glide.with(this@FirstFragment)
+                            Glide.with(this@ProfileFragment)
                                 .load(image)
                                 .diskCacheStrategy(DiskCacheStrategy.ALL) // Cache both original & resized image
                                 .apply(RequestOptions().centerCrop())
@@ -114,20 +113,22 @@ class FirstFragment : Fragment() {
                     saveImageToStorage(imageBitmap)
                 }
             }
-
         pickPictureLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
                     val data: Intent? = result.data
                     val imageUri = data?.data
-                    val imageBitmap = MediaStore.Images.Media.getBitmap(
-                        requireContext().contentResolver,
-                        imageUri
-                    )
-                    saveImageToStorage(imageBitmap)
+                    imageUri?.let { uri ->
+                        try {
+                            val bitmap = MediaStore.Images.Media.getBitmap(requireActivity().contentResolver, uri)
+                            saveImageToStorage(bitmap)
+                        } catch (e: IOException) {
+                            e.printStackTrace()
+                        }
+                    }
+                    // Do something with the image Uri, such as display it in an ImageView
                 }
             }
-
         binding.btnTakePicture.setOnClickListener {
             captureImage()
         }
@@ -167,17 +168,6 @@ class FirstFragment : Fragment() {
         }
     }
 
-    // Launch gallery
-    private fun dispatchPickPictureIntent() {
-        Intent(
-            Intent.ACTION_PICK,
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        ).also { pickPictureIntent ->
-            pickPictureIntent.type = "image/*"
-            pickPictureLauncher.launch(pickPictureIntent)
-        }
-    }
-
     fun saveBitmapToFile(context: Context, bitmap: Bitmap): String? {
         val fileName = "image_${System.currentTimeMillis()}.jpg"
         var file: File? = null
@@ -196,6 +186,7 @@ class FirstFragment : Fragment() {
             file?.absolutePath
         }
     }
+
     // Save the image to storage (same as before)
     private fun saveImageToStorage(imageBitmap: Bitmap) {
         // Code to save the image to storage
@@ -207,7 +198,7 @@ class FirstFragment : Fragment() {
         image?.let {
             profileViewModel.updateProfileImage(id, it)
 
-            Glide.with(this@FirstFragment)
+            Glide.with(this@ProfileFragment)
                 .load(it)
                 .diskCacheStrategy(DiskCacheStrategy.ALL) // Cache both original & resized image
                 .apply(RequestOptions().centerCrop())
@@ -246,11 +237,39 @@ class FirstFragment : Fragment() {
 
     // Request storage permission
     private fun requestStoragePermission() {
-        ActivityCompat.requestPermissions(
-            requireActivity(),
-            storagePermission,
-            REQUEST_STORAGE_PERMISSION_CODE
-        )
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                dispatchPickPictureIntent()
+                // You already have the permission; perform your action here.
+            }
+
+            shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
+                // Explain why you need the permission and then request it.
+
+                // Provide an explanation for why you need the storage permission
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Storage Permission Needed")
+                    .setMessage("This app needs storage permission to save your files.")
+                    .setPositiveButton("OK") { _, _ ->
+                        // Request the permission after the user has acknowledged the explanation
+                        requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    }
+                    .setNegativeButton("Cancel") { dialog, _ ->
+                        // Handle the case if the user cancels the permission request
+                        dialog.dismiss()
+                    }
+                    .create()
+                    .show()
+            }
+
+            else -> {
+                // You don't have the permission; request it directly.
+                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+        }
     }
 
     // Override onRequestPermissionsResult to handle permission request results
@@ -275,10 +294,32 @@ class FirstFragment : Fragment() {
                     dispatchPickPictureIntent()
                 } else {
                     showToast(R.string.please_grant_app_permissions)
-
                 }
             }
         }
+    }
+
+    private fun dispatchPickPictureIntent() {
+
+        dispatchPickPictureIntentForAndroidBelow12()
+
+    }
+
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                // Permission is granted. Perform your action here.
+            } else {
+                // Permission is denied. Handle the denied case here.
+            }
+        }
+
+    // Dispatch pick picture intent for Android versions below 12
+    private fun dispatchPickPictureIntentForAndroidBelow12() {
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.type = "image/*"
+
+        pickPictureLauncher.launch(intent)
     }
 
     private fun showToast(@StringRes errorString: Int) {

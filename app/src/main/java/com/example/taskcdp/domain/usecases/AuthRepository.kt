@@ -16,5 +16,4 @@ interface AuthRepository {
     fun saveRememberUser(isChecked: Boolean)
     fun clearLoginDetails()
     fun clearAllData()
-    suspend fun login(username: String, password: String)
 }
