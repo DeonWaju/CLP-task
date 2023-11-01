@@ -16,6 +16,9 @@ interface UserProfileDao {
     @Query("SELECT * FROM UserProfile LIMIT 1")
     fun getUserProfile(): Flow<UserProfile?>
 
+    @Query("UPDATE userprofile SET image = :imageUrl WHERE id = :userId")
+    suspend fun updateUserImage(userId: Int, imageUrl: String)
+
     @Query("DELETE FROM UserProfile")
     suspend fun deleteAll()
 }

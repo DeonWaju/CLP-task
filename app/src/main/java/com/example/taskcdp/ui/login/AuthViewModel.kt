@@ -5,15 +5,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.taskcdp.data.AuthRepository
+import com.example.taskcdp.data.local.entity.UserProfile
+import com.example.taskcdp.domain.usecases.AuthRepository
 import com.example.taskcdp.data.model.LoginRequest
 import com.example.taskcdp.data.model.Responses
+import com.example.taskcdp.domain.usecases.SaveUserProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -27,6 +27,7 @@ data class LoginResponse(
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    private val saveUserProfileRepository: SaveUserProfileRepository,
 ) : ViewModel() {
 
     private val _rememberMeChecked = MutableLiveData<Boolean>()
@@ -70,6 +71,20 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun saveUserDetails(response: Responses.LoginUserDataResponse){
+        viewModelScope.launch {
+            saveUserProfileRepository.invoke(
+                UserProfile(
+                    id = response.id.toInt(),
+                    image = response.image,
+                    firstName = response.firstName,
+                    lastName = response.lastName,
+                    email = response.email,
+                )
+            )
+        }
+    }
+
     fun onRememberMeChecked(checked: Boolean) {
         _rememberMeChecked.value = checked
     }
@@ -82,6 +97,7 @@ class AuthViewModel @Inject constructor(
 
     fun saveUserIsAuthenticated(isAuth: Boolean) =
         authRepository.saveUserIsAuthenticated(isAuth)
+
     fun userIsAuthenticated(): Boolean =
         authRepository.userIsAuthenticated()
 

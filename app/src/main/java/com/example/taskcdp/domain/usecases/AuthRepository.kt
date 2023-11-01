@@ -1,4 +1,4 @@
-package com.example.taskcdp.data
+package com.example.taskcdp.domain.usecases
 
 import Resource
 import com.example.taskcdp.data.model.LoginRequest

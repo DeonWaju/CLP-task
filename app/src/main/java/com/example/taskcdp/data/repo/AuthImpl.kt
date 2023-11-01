@@ -1,11 +1,11 @@
-package com.example.taskcdp.domain
+package com.example.taskcdp.data.repo
 
 import Resource
 import com.example.taskcdp.di.AppDispatchers
 import com.example.taskcdp.di.Dispatcher
 import com.example.taskcdp.util.SessionManager
-import com.example.taskcdp.data.ApiService
-import com.example.taskcdp.data.AuthRepository
+import com.example.taskcdp.data.remote.ApiService
+import com.example.taskcdp.domain.usecases.AuthRepository
 import com.example.taskcdp.data.model.LoginRequest
 import com.example.taskcdp.data.model.Responses
 import kotlinx.coroutines.CoroutineDispatcher

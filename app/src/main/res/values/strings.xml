@@ -58,7 +58,10 @@
     <string name="loading">Loading</string>
     <string name="an_error_occured">An error occurred!</string>
     <string name="prompt_username">Username</string>
-    <string name="fullname">"Fullname: "</string>
+    <string name="fullname">"Full Name: "</string>
     <string name="logout">Logout</string>
     <string name="prompt_picture">Take a picture</string>
+    <string name="pick_a_picture_from_gallery">Take a picture from gallery</string>
+    <string name="email">"Email: "</string>
+    <string name="please_grant_app_permissions">Please grant app permissions</string>
 </resources>

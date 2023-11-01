@@ -1,4 +1,4 @@
-package com.example.taskcdp.data
+package com.example.taskcdp.data.remote
 
 import com.example.taskcdp.data.model.LoginRequest
 import com.example.taskcdp.data.model.Responses

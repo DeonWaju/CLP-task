@@ -2,13 +2,19 @@ package com.example.taskcdp.di
 
 import android.content.Context
 import androidx.room.Room
-import com.example.taskcdp.domain.AuthImpl
+import com.example.taskcdp.data.repo.AuthImpl
 import com.example.taskcdp.BuildConfig
 import com.example.taskcdp.util.SessionManager
-import com.example.taskcdp.data.ApiService
+import com.example.taskcdp.data.remote.ApiService
 import com.example.taskcdp.data.local.AppDatabase
-import com.example.taskcdp.data.AuthRepository
+import com.example.taskcdp.domain.usecases.AuthRepository
 import com.example.taskcdp.data.local.dao.UserProfileDao
+import com.example.taskcdp.data.repo.SaveUserProfileImpl
+import com.example.taskcdp.data.repo.UpdateProfileImageImpl
+import com.example.taskcdp.data.repo.UserProfileImpl
+import com.example.taskcdp.domain.usecases.SaveUserProfileRepository
+import com.example.taskcdp.domain.usecases.UpdateProfileImageRepository
+import com.example.taskcdp.domain.usecases.UserProfileRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -39,7 +45,7 @@ object AppModule {
 
 
     @Provides
-    fun provideCartDao(database: AppDatabase): UserProfileDao {
+    fun provideUserDao(database: AppDatabase): UserProfileDao {
         return database.userProfileDao()
     }
 
@@ -77,7 +83,32 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAuthUsecaseImpl(apiService: ApiService, sessionManager: SessionManager, ioDispatcher: CoroutineDispatcher): AuthRepository = AuthImpl(apiService, sessionManager, ioDispatcher)
+    fun provideAuthUsecaseImpl(
+        apiService: ApiService,
+        sessionManager: SessionManager,
+        ioDispatcher: CoroutineDispatcher
+    ): AuthRepository = AuthImpl(apiService, sessionManager, ioDispatcher)
+
+    @Provides
+    @Singleton
+    fun provideSaveUserProfileUsecaseImpl(
+        userProfileDao: UserProfileDao,
+        ioDispatcher: CoroutineDispatcher
+    ): SaveUserProfileRepository = SaveUserProfileImpl( userProfileDao, ioDispatcher)
+
+    @Provides
+    @Singleton
+    fun provideUserProfileUsecaseImpl(
+        userProfileDao: UserProfileDao,
+        ioDispatcher: CoroutineDispatcher
+    ): UserProfileRepository = UserProfileImpl(userProfileDao, ioDispatcher)
+
+    @Provides
+    @Singleton
+    fun provideUpdateProfileImageRepositoryImpl(
+        userProfileDao: UserProfileDao,
+        ioDispatcher: CoroutineDispatcher
+    ): UpdateProfileImageRepository = UpdateProfileImageImpl(userProfileDao, ioDispatcher)
 
     @Provides
     @Singleton
@@ -85,5 +116,6 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideSessionManager(@ApplicationContext context: Context): SessionManager = SessionManager(context)
+    fun provideSessionManager(@ApplicationContext context: Context): SessionManager =
+        SessionManager(context)
 }

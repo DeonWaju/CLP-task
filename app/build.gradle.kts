@@ -108,8 +108,9 @@ dependencies {
     //SecurePreference
     implementation("androidx.security:security-crypto:1.1.0-alpha03")
 
-    //Picasso
-    implementation("com.squareup.picasso:picasso:2.71828")
 
+    //Glide
+    implementation("com.github.bumptech.glide:glide:4.12.0")
+    kapt("com.github.bumptech.glide:compiler:4.12.0")
 
 }
