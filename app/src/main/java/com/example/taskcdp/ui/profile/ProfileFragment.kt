@@ -73,6 +73,8 @@ class ProfileFragment : Fragment() {
         requestCameraPermission()
         requestStoragePermission()
 
+        profileViewModel.userProfile()
+
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
@@ -93,7 +95,9 @@ class ProfileFragment : Fragment() {
                                 append(it.email)
                             }
 
-                            profileViewModel.updateProfileImage(id, image)
+                            if (image.isNotEmpty()) {
+                                profileViewModel.updateProfileImage(id, image)
+                            }
 
                             Glide.with(this@ProfileFragment)
                                 .load(image)

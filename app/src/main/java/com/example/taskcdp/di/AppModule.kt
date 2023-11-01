@@ -2,16 +2,18 @@ package com.example.taskcdp.di
 
 import android.content.Context
 import androidx.room.Room
-import com.example.taskcdp.data.repo.AuthImpl
+import com.example.taskcdp.data.repo.AuthLocalImpl
 import com.example.taskcdp.BuildConfig
 import com.example.taskcdp.util.SessionManager
 import com.example.taskcdp.data.remote.ApiService
 import com.example.taskcdp.data.local.AppDatabase
-import com.example.taskcdp.domain.usecases.AuthRepository
+import com.example.taskcdp.domain.usecases.AuthLocalRepository
 import com.example.taskcdp.data.local.dao.UserProfileDao
+import com.example.taskcdp.data.repo.AuthRemoteImpl
 import com.example.taskcdp.data.repo.SaveUserProfileImpl
 import com.example.taskcdp.data.repo.UpdateProfileImageImpl
 import com.example.taskcdp.data.repo.UserProfileImpl
+import com.example.taskcdp.domain.usecases.AuthRemoteRepository
 import com.example.taskcdp.domain.usecases.SaveUserProfileRepository
 import com.example.taskcdp.domain.usecases.UpdateProfileImageRepository
 import com.example.taskcdp.domain.usecases.UserProfileRepository
@@ -84,11 +86,17 @@ object AppModule {
     @Provides
     @Singleton
     fun provideAuthUsecaseImpl(
-        apiService: ApiService,
         sessionManager: SessionManager,
         userProfileDao: UserProfileDao,
+        mainDispatcher: CoroutineDispatcher
+    ): AuthLocalRepository = AuthLocalImpl(sessionManager, userProfileDao, mainDispatcher)
+
+    @Provides
+    @Singleton
+    fun provideAuthRemoteUsecaseImpl(
+        apiService: ApiService,
         ioDispatcher: CoroutineDispatcher
-    ): AuthRepository = AuthImpl(apiService, sessionManager, userProfileDao, ioDispatcher)
+    ): AuthRemoteRepository = AuthRemoteImpl(apiService, ioDispatcher)
 
     @Provides
     @Singleton

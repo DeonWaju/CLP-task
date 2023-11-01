@@ -5,16 +5,21 @@ import com.example.taskcdp.data.model.LoginRequest
 import com.example.taskcdp.data.model.Responses
 import kotlinx.coroutines.flow.Flow
 
-interface AuthRepository {
-
-    fun loginUser(loginRequest: LoginRequest): Flow<Resource<Responses.LoginUserDataResponse>>
+interface AuthLocalRepository {
     fun getLoginDetails(): Pair<String, String>?
-    fun userIsAuthenticated(): Boolean
-    fun saveUserIsAuthenticated(isAuth: Boolean)
     fun saveLoginDetails(username: String, password: String)
+
+    fun userIsAuthenticated(): Boolean
+
+    fun saveUserIsAuthenticated(isAuth: Boolean)
+
     fun getRememberUser(): Boolean
+
     fun saveRememberUser(isChecked: Boolean)
+
     fun clearLoginDetails()
+
     fun clearAllData()
+
     suspend fun clearUserData()
 }

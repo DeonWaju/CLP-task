@@ -7,7 +7,7 @@ import com.example.taskcdp.di.AppDispatchers
 import com.example.taskcdp.di.Dispatcher
 import com.example.taskcdp.util.SessionManager
 import com.example.taskcdp.data.remote.ApiService
-import com.example.taskcdp.domain.usecases.AuthRepository
+import com.example.taskcdp.domain.usecases.AuthLocalRepository
 import com.example.taskcdp.data.model.LoginRequest
 import com.example.taskcdp.data.model.Responses
 import kotlinx.coroutines.CoroutineDispatcher
@@ -17,27 +17,11 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class AuthImpl @Inject constructor(
-    private val api: ApiService,
+class AuthLocalImpl @Inject constructor(
     private val sessionManager: SessionManager,
     private val userProfileDao: UserProfileDao,
-    @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
-) : AuthRepository {
-    override fun loginUser(loginRequest: LoginRequest): Flow<Resource<Responses.LoginUserDataResponse>> =
-        flow {
-            emit(Resource.Loading())
-
-            val remoteData = try {
-                api.login(loginRequest)
-            } catch (e: Exception) {
-                emit(Resource.Error(message = e.message ?: SOMETHING_WRONG))
-                null
-            }
-
-            remoteData?.let {
-                emit(Resource.Success(it))
-            }
-        }.flowOn(ioDispatcher)
+    @Dispatcher(AppDispatchers.MAIN) private val mainDispatcher: CoroutineDispatcher,
+) : AuthLocalRepository {
 
     override fun getLoginDetails(): Pair<String, String>? = sessionManager.getLoginDetails()
     override fun userIsAuthenticated(): Boolean = sessionManager.isAuth()
@@ -52,7 +36,7 @@ class AuthImpl @Inject constructor(
     override fun clearLoginDetails() = sessionManager.clearLoginDetails()
 
     override fun clearAllData() = sessionManager.clearData()
-    override suspend fun clearUserData() = withContext(ioDispatcher) {
+    override suspend fun clearUserData() = withContext(mainDispatcher) {
         userProfileDao.deleteAll()
     }
 }

@@ -6,11 +6,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.taskcdp.data.local.entity.UserProfile
-import com.example.taskcdp.domain.usecases.AuthRepository
+import com.example.taskcdp.domain.usecases.AuthLocalRepository
 import com.example.taskcdp.data.model.LoginRequest
 import com.example.taskcdp.data.model.Responses
+import com.example.taskcdp.domain.usecases.AuthRemoteRepository
 import com.example.taskcdp.domain.usecases.SaveUserProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,7 +28,8 @@ data class LoginResponse(
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository,
+    private val authLocalRepository: AuthLocalRepository,
+    private val authRemoteRepository: AuthRemoteRepository,
     private val saveUserProfileRepository: SaveUserProfileRepository,
 ) : ViewModel() {
 
@@ -40,7 +43,7 @@ class AuthViewModel @Inject constructor(
         _loginState.update { it.copy(loading = true) }
 
         viewModelScope.launch {
-            authRepository.loginUser(loginRequest).collect { result ->
+            authRemoteRepository.invoke(loginRequest).collect { result ->
                 when (result) {
                     is Resource.Success -> {
                         _loginState.update {
@@ -88,26 +91,23 @@ class AuthViewModel @Inject constructor(
     fun onRememberMeChecked(checked: Boolean) {
         _rememberMeChecked.value = checked
     }
-    // A placeholder username validation check
 
-    fun getLoginDetails(): Pair<String, String>? = authRepository.getLoginDetails()
+    fun getLoginDetails(): Pair<String, String>? = authLocalRepository.getLoginDetails()
 
-    fun saveLoginDetails(username: String, password: String) =
-        authRepository.saveLoginDetails(username, password)
+    fun saveLoginDetails(username: String, password: String) = authLocalRepository.saveLoginDetails(username, password)
 
-    fun saveUserIsAuthenticated(isAuth: Boolean) =
-        authRepository.saveUserIsAuthenticated(isAuth)
+    fun saveUserIsAuthenticated(isAuth: Boolean) = authLocalRepository.saveUserIsAuthenticated(isAuth)
 
-    fun userIsAuthenticated(): Boolean =
-        authRepository.userIsAuthenticated()
+    fun userIsAuthenticated(): Boolean = authLocalRepository.userIsAuthenticated()
 
-    fun clearLoginDetails() = authRepository.clearLoginDetails()
+    fun clearLoginDetails() = authLocalRepository.clearLoginDetails()
 
-    fun isUserNameValid(username: String): Boolean {
-        return username.length > 3
-    }
+    fun isUserNameValid(username: String): Boolean = username.length > 3
 
-    fun isPasswordValid(password: String): Boolean {
-        return password.length > 5
+    fun isPasswordValid(password: String): Boolean = password.length > 5
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelScope.cancel()
     }
 }

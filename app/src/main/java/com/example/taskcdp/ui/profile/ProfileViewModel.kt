@@ -3,10 +3,11 @@ package com.example.taskcdp.ui.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.taskcdp.data.local.entity.UserProfile
-import com.example.taskcdp.domain.usecases.AuthRepository
+import com.example.taskcdp.domain.usecases.AuthLocalRepository
 import com.example.taskcdp.domain.usecases.UpdateProfileImageRepository
 import com.example.taskcdp.domain.usecases.UserProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,29 +17,26 @@ import javax.inject.Inject
 
 
 data class UserProfileData(
-    val profile: UserProfile
+    val profile: UserProfile? = null
 )
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val userProfileRepository: UserProfileRepository,
     private val updateProfileImageRepository: UpdateProfileImageRepository,
-    private val authRepository: AuthRepository,
+    private val authLocalRepository: AuthLocalRepository,
 ) : ViewModel() {
 
-    init {
-        userProfile()
-    }
 
     private val _profileUserState =
         MutableStateFlow(UserProfileData(UserProfile(-1, "", "", "", "")))
     var profileUserState: StateFlow<UserProfileData?> = _profileUserState.asStateFlow()
 
-    private fun userProfile() {
+    fun userProfile() {
         viewModelScope.launch {
             userProfileRepository.invoke().collect { profile ->
-                _profileUserState.update { currentState ->
-                    UserProfileData(profile!!)
+                _profileUserState.update {
+                    UserProfileData(profile)
                 }
             }
         }
@@ -52,8 +50,13 @@ class ProfileViewModel @Inject constructor(
 
     fun logout(isAuth: Boolean){
         viewModelScope.launch {
-            authRepository.clearUserData()
-            authRepository.saveUserIsAuthenticated(isAuth)
+            authLocalRepository.clearUserData()
+            authLocalRepository.saveUserIsAuthenticated(isAuth)
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelScope.cancel()
     }
 }
