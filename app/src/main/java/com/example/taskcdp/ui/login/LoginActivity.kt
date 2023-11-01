@@ -2,10 +2,7 @@ package com.example.taskcdp.ui.login
 
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.View
-import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.StringRes
@@ -44,7 +41,7 @@ class LoginActivity : AppCompatActivity() {
                     authViewModel.loginState.collect {
                         Timber.e("LoginData:::: ${it.data}")
                         when {
-                            it.data.firstName.isNotEmpty() && it.data.lastName.isNotEmpty() -> {
+                            it.data.firstName.isNotBlank() && it.data.lastName.isNotBlank() -> {
                                 binding.loading.visibility = View.GONE
                                 authViewModel.saveUserIsAuthenticated(true)
                                 authViewModel.saveUserDetails(it.data)

@@ -64,4 +64,5 @@
     <string name="pick_a_picture_from_gallery">Take a picture from gallery</string>
     <string name="email">"Email: "</string>
     <string name="please_grant_app_permissions">Please grant app permissions</string>
+    <string name="profile_fragment_label">Profile fragment</string>
 </resources>

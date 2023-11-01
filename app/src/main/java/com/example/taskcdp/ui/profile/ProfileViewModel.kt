@@ -4,11 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.taskcdp.data.local.entity.UserProfile
 import com.example.taskcdp.domain.usecases.AuthRepository
-import com.example.taskcdp.data.model.Responses
-import com.example.taskcdp.domain.usecases.SaveUserProfileRepository
 import com.example.taskcdp.domain.usecases.UpdateProfileImageRepository
 import com.example.taskcdp.domain.usecases.UserProfileRepository
-import com.example.taskcdp.ui.login.LoginResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,7 +22,8 @@ data class UserProfileData(
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val userProfileRepository: UserProfileRepository,
-    private val updateProfileImageRepository: UpdateProfileImageRepository
+    private val updateProfileImageRepository: UpdateProfileImageRepository,
+    private val authRepository: AuthRepository,
 ) : ViewModel() {
 
     init {
@@ -49,6 +47,13 @@ class ProfileViewModel @Inject constructor(
     fun updateProfileImage(id: Int, imageUrl: String) {
         viewModelScope.launch {
             updateProfileImageRepository.invoke(id, imageUrl)
+        }
+    }
+
+    fun logout(isAuth: Boolean){
+        viewModelScope.launch {
+            authRepository.clearUserData()
+            authRepository.saveUserIsAuthenticated(isAuth)
         }
     }
 }

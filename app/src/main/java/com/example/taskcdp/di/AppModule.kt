@@ -86,8 +86,9 @@ object AppModule {
     fun provideAuthUsecaseImpl(
         apiService: ApiService,
         sessionManager: SessionManager,
+        userProfileDao: UserProfileDao,
         ioDispatcher: CoroutineDispatcher
-    ): AuthRepository = AuthImpl(apiService, sessionManager, ioDispatcher)
+    ): AuthRepository = AuthImpl(apiService, sessionManager, userProfileDao, ioDispatcher)
 
     @Provides
     @Singleton

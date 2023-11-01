@@ -110,6 +110,4 @@ class AuthViewModel @Inject constructor(
     fun isPasswordValid(password: String): Boolean {
         return password.length > 5
     }
-
-    fun clearAllData() = authRepository.clearAllData()
 }

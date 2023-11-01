@@ -3,12 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/FirstFragment">
+    app:startDestination="@id/ProfileFragment">
 
     <fragment
-        android:id="@+id/FirstFragment"
+        android:id="@+id/ProfileFragment"
         android:name="com.example.taskcdp.ui.profile.ProfileFragment"
-        android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first"/>
+        android:label="@string/profile_fragment_label"
+        tools:layout="@layout/fragment_profile"/>
 
 </navigation>

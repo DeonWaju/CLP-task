@@ -11,7 +11,6 @@ class SessionManager(context: Context) {
         const val KEY_USERNAME = "username"
         const val KEY_PASSWORD = "password"
         const val KEY_REMEMBER_USER = "isRememberUser"
-        const val KEY_TOKEN = "token"
         const val KEY_IS_AUTH = "user_authenticated"
     }
 
@@ -46,9 +45,9 @@ class SessionManager(context: Context) {
         return sharedPreferences.getBoolean(KEY_IS_AUTH, false)
     }
 
-    fun isAuth(isRememberUser: Boolean) {
+    fun isAuth(isAuth: Boolean) {
         sharedPreferences.edit {
-            putBoolean(KEY_IS_AUTH, isRememberUser)
+            putBoolean(KEY_IS_AUTH, isAuth)
         }
     }
 

@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -29,7 +28,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.example.taskcdp.R
-import com.example.taskcdp.databinding.FragmentFirstBinding
+import com.example.taskcdp.databinding.FragmentProfileBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.io.File
@@ -44,7 +43,7 @@ import java.io.OutputStream
 @AndroidEntryPoint
 class ProfileFragment : Fragment() {
 
-    private var _binding: FragmentFirstBinding? = null
+    private var _binding: FragmentProfileBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -64,19 +63,21 @@ class ProfileFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentFirstBinding.inflate(inflater, container, false)
+        _binding = FragmentProfileBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        requestCameraPermission()
+        requestStoragePermission()
+
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     profileViewModel.profileUserState.collect {
                         it?.profile?.let {
-
                             id = it.id
                             image = it.image
 
@@ -113,6 +114,7 @@ class ProfileFragment : Fragment() {
                     saveImageToStorage(imageBitmap)
                 }
             }
+
         pickPictureLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
@@ -120,13 +122,15 @@ class ProfileFragment : Fragment() {
                     val imageUri = data?.data
                     imageUri?.let { uri ->
                         try {
-                            val bitmap = MediaStore.Images.Media.getBitmap(requireActivity().contentResolver, uri)
+                            val bitmap = MediaStore.Images.Media.getBitmap(
+                                requireActivity().contentResolver,
+                                uri
+                            )
                             saveImageToStorage(bitmap)
                         } catch (e: IOException) {
                             e.printStackTrace()
                         }
                     }
-                    // Do something with the image Uri, such as display it in an ImageView
                 }
             }
         binding.btnTakePicture.setOnClickListener {
@@ -138,7 +142,7 @@ class ProfileFragment : Fragment() {
         }
 
         binding.btLogout.setOnClickListener {
-
+            logout()
         }
     }
 
@@ -187,13 +191,9 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    // Save the image to storage (same as before)
     private fun saveImageToStorage(imageBitmap: Bitmap) {
-        // Code to save the image to storage
-        // Update the profile picture with the new image
 
         val image = saveBitmapToFile(requireContext(), imageBitmap)
-
 
         image?.let {
             profileViewModel.updateProfileImage(id, it)
@@ -207,8 +207,6 @@ class ProfileFragment : Fragment() {
     }
 
     private val cameraPermission = arrayOf(Manifest.permission.CAMERA)
-    private val storagePermission =
-        arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
     // Check if the camera permission is granted
     private fun isCameraPermissionGranted(): Boolean {
@@ -243,7 +241,6 @@ class ProfileFragment : Fragment() {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             ) == PackageManager.PERMISSION_GRANTED -> {
                 dispatchPickPictureIntent()
-                // You already have the permission; perform your action here.
             }
 
             shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
@@ -300,21 +297,18 @@ class ProfileFragment : Fragment() {
     }
 
     private fun dispatchPickPictureIntent() {
-
         dispatchPickPictureIntentForAndroidBelow12()
-
     }
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
-                // Permission is granted. Perform your action here.
+                dispatchPickPictureIntent()
             } else {
                 // Permission is denied. Handle the denied case here.
             }
         }
 
-    // Dispatch pick picture intent for Android versions below 12
     private fun dispatchPickPictureIntentForAndroidBelow12() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
@@ -324,6 +318,21 @@ class ProfileFragment : Fragment() {
 
     private fun showToast(@StringRes errorString: Int) {
         Toast.makeText(activity?.applicationContext, errorString, Toast.LENGTH_LONG).show()
+    }
+
+    private fun logout(){
+        AlertDialog.Builder(requireContext())
+            .setTitle("Logout")
+            .setMessage("Are you sure you want to logout.")
+            .setPositiveButton("Yes") { _, _ ->
+                profileViewModel.logout(false)
+                activity?.finish()
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+            .show()
     }
 
     override fun onDestroyView() {
