@@ -1,26 +1,82 @@
 package com.example.taskcdp.ui.login
 
+import Resource
 import androidx.lifecycle.ViewModel
 import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.example.taskcdp.R
 import com.example.taskcdp.data.AuthRepository
-import com.example.taskcdp.ui.login.ui.login.LoginFormState
+import com.example.taskcdp.data.model.LoginRequest
+import com.example.taskcdp.data.model.Responses
 
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+data class LoginResponse(
+    var data: Responses.LoginUserDataResponse,
+    val loading: Boolean = false,
+    val error: String = "",
+)
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
 ) : ViewModel() {
 
-    private val _loginForm = MutableLiveData<LoginFormState>()
-    val loginFormState: LiveData<LoginFormState> = _loginForm
-
     private val _rememberMeChecked = MutableLiveData<Boolean>()
     val rememberMeChecked: LiveData<Boolean> get() = _rememberMeChecked
+
+    private val _loginState = MutableStateFlow(LoginResponse(Responses.LoginUserDataResponse()))
+    var loginState: StateFlow<LoginResponse> = _loginState.asStateFlow()
+
+    private val _uiEvent = Channel<String>()
+    val uiEvent = _uiEvent.receiveAsFlow()
+
+
+    fun login(loginRequest: LoginRequest) {
+        _loginState.update { it.copy(loading = true) }
+
+        viewModelScope.launch {
+            authRepository.loginUser(loginRequest).collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        _loginState.update {
+                            it.copy(
+                                loading = false,
+                                data = result.data!!
+                            )
+                        }
+                    }
+
+                    is Resource.Error -> {
+                        _loginState.update {
+                            it.copy(
+                                loading = false,
+                                data = result.data ?: Responses.LoginUserDataResponse(),
+                                error = result.message ?: "Something went wrong"
+                            )
+                        }
+                        _uiEvent.send(result.message ?: "Something went wrong")
+                    }
+
+                    is Resource.Loading -> {
+                        _loginState.update { it.copy(loading = true) }
+                    }
+
+                    else -> {}
+                }
+            }
+        }
+    }
 
     fun onRememberMeChecked(checked: Boolean) {
         _rememberMeChecked.value = checked
@@ -32,6 +88,11 @@ class AuthViewModel @Inject constructor(
     fun saveLoginDetails(username: String, password: String) =
         authRepository.saveLoginDetails(username, password)
 
+    fun saveUserIsAuthenticated(isAuth: Boolean) =
+        authRepository.saveUserIsAuthenticated(isAuth)
+    fun userIsAuthenticated(): Boolean =
+        authRepository.userIsAuthenticated()
+
 
     fun getIsRememberButtonCheck() = authRepository.getRememberUser()
 
@@ -42,25 +103,11 @@ class AuthViewModel @Inject constructor(
 
     fun clearAllData() = authRepository.clearAllData()
 
-    fun loginDataChanged(username: String, password: String) {
-        if (!isUserNameValid(username)) {
-            _loginForm.value = LoginFormState(usernameError = R.string.invalid_username)
-        } else if (!isPasswordValid(password)) {
-            _loginForm.value = LoginFormState(passwordError = R.string.invalid_password)
-        } else {
-            _loginForm.value = LoginFormState(isDataValid = true)
-        }
+    fun isUserNameValid(username: String): Boolean {
+        return username.length > 3
     }
 
-    private fun isUserNameValid(username: String): Boolean {
-        return if (username.contains('@')) {
-            Patterns.EMAIL_ADDRESS.matcher(username).matches()
-        } else {
-            username.isNotBlank()
-        }
-    }
-
-    private fun isPasswordValid(password: String): Boolean {
+    fun isPasswordValid(password: String): Boolean {
         return password.length > 5
     }
 }

@@ -4,13 +4,15 @@ import android.content.Context
 import android.content.SharedPreferences
 
 class SessionManager(context: Context) {
-    private val sharedPreferences: SharedPreferences = context.getSharedPreferences("AppSharedPref", Context.MODE_PRIVATE)
-    
+    private val sharedPreferences: SharedPreferences =
+        context.getSharedPreferences("AppSharedPref", Context.MODE_PRIVATE)
+
     companion object {
         const val KEY_USERNAME = "username"
         const val KEY_PASSWORD = "password"
         const val KEY_REMEMBER_USER = "isRememberUser"
         const val KEY_TOKEN = "token"
+        const val KEY_IS_AUTH = "user_authenticated"
     }
 
     fun saveLoginDetails(username: String, password: String) {
@@ -40,14 +42,13 @@ class SessionManager(context: Context) {
         }
     }
 
-    fun clearData() {
-        sharedPreferences.edit().clear().apply()
+    fun isAuth(): Boolean {
+        return sharedPreferences.getBoolean(KEY_IS_AUTH, false)
     }
 
-    fun clearLoginDetails() {
+    fun isAuth(isRememberUser: Boolean) {
         sharedPreferences.edit {
-            remove(KEY_USERNAME)
-            remove(KEY_PASSWORD)
+            putBoolean(KEY_IS_AUTH, isRememberUser)
         }
     }
 
@@ -59,6 +60,17 @@ class SessionManager(context: Context) {
 
     fun getToken(): String? {
         return sharedPreferences.getString(KEY_TOKEN, null)
+    }
+
+    fun clearData() {
+        sharedPreferences.edit().clear().apply()
+    }
+
+    fun clearLoginDetails() {
+        sharedPreferences.edit {
+            remove(KEY_USERNAME)
+            remove(KEY_PASSWORD)
+        }
     }
 }
 

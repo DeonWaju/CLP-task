@@ -1,11 +1,17 @@
 package com.example.taskcdp.domain
 
+import Resource
 import com.example.taskcdp.di.AppDispatchers
 import com.example.taskcdp.di.Dispatcher
 import com.example.taskcdp.util.SessionManager
 import com.example.taskcdp.data.ApiService
 import com.example.taskcdp.data.AuthRepository
+import com.example.taskcdp.data.model.LoginRequest
+import com.example.taskcdp.data.model.Responses
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 class AuthImpl @Inject constructor(
@@ -13,8 +19,24 @@ class AuthImpl @Inject constructor(
     private val sessionManager: SessionManager,
     @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher
 ) : AuthRepository {
+    override fun loginUser(loginRequest: LoginRequest): Flow<Resource<Responses.LoginUserDataResponse>> = flow {
+        emit(Resource.Loading())
+
+        val remoteData = try {
+            api.login(loginRequest)
+        } catch (e: Exception){
+            emit(Resource.Error(message = e.message ?: "Something went wrong, Please check your network..."))
+            null
+        }
+
+        remoteData?.let {
+            emit(Resource.Success(it))
+        }
+    }.flowOn(ioDispatcher)
 
     override fun getLoginDetails(): Pair<String, String>? = sessionManager.getLoginDetails()
+    override fun userIsAuthenticated(): Boolean = sessionManager.isAuth()
+    override fun saveUserIsAuthenticated(isAuth:Boolean) = sessionManager.isAuth(isAuth)
 
     override fun saveLoginDetails(username: String, password: String) = sessionManager.saveLoginDetails(username, password)
 

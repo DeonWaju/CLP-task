@@ -20,7 +20,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "BASE_URL", "\"https://api.weatherapi.com/v1/\"")
+        buildConfigField("String", "BASE_URL", "\"https://dummyjson.com/\"")
         buildConfigField("String", "API_KEY", "\"API_KEY_GOES_HERE\"")
     }
 
