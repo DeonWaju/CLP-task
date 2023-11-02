@@ -9,11 +9,11 @@ import com.example.taskcdp.data.remote.ApiService
 import com.example.taskcdp.data.local.AppDatabase
 import com.example.taskcdp.domain.usecases.AuthLocalRepository
 import com.example.taskcdp.data.local.dao.UserProfileDao
-import com.example.taskcdp.data.repo.AuthRemoteImpl
+import com.example.taskcdp.data.repo.LoginUserImpl
 import com.example.taskcdp.data.repo.SaveUserProfileImpl
 import com.example.taskcdp.data.repo.UpdateProfileImageImpl
 import com.example.taskcdp.data.repo.UserProfileImpl
-import com.example.taskcdp.domain.usecases.AuthRemoteRepository
+import com.example.taskcdp.domain.usecases.LoginUserRepository
 import com.example.taskcdp.domain.usecases.SaveUserProfileRepository
 import com.example.taskcdp.domain.usecases.UpdateProfileImageRepository
 import com.example.taskcdp.domain.usecases.UserProfileRepository
@@ -96,7 +96,7 @@ object AppModule {
     fun provideAuthRemoteUsecaseImpl(
         apiService: ApiService,
         ioDispatcher: CoroutineDispatcher
-    ): AuthRemoteRepository = AuthRemoteImpl(apiService, ioDispatcher)
+    ): LoginUserRepository = LoginUserImpl(apiService, ioDispatcher)
 
     @Provides
     @Singleton

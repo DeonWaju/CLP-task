@@ -9,7 +9,7 @@ import com.example.taskcdp.data.local.entity.UserProfile
 import com.example.taskcdp.domain.usecases.AuthLocalRepository
 import com.example.taskcdp.data.model.LoginRequest
 import com.example.taskcdp.data.model.Responses
-import com.example.taskcdp.domain.usecases.AuthRemoteRepository
+import com.example.taskcdp.domain.usecases.LoginUserRepository
 import com.example.taskcdp.domain.usecases.SaveUserProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.cancel
@@ -29,7 +29,7 @@ data class LoginResponse(
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authLocalRepository: AuthLocalRepository,
-    private val authRemoteRepository: AuthRemoteRepository,
+    private val loginUserRepository: LoginUserRepository,
     private val saveUserProfileRepository: SaveUserProfileRepository,
 ) : ViewModel() {
 
@@ -43,7 +43,7 @@ class AuthViewModel @Inject constructor(
         _loginState.update { it.copy(loading = true) }
 
         viewModelScope.launch {
-            authRemoteRepository.invoke(loginRequest).collect { result ->
+            loginUserRepository.invoke(loginRequest).collect { result ->
                 when (result) {
                     is Resource.Success -> {
                         _loginState.update {

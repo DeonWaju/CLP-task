@@ -19,18 +19,20 @@
         android:id="@+id/btnTakePicture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/_20sdp"
         android:text="@string/prompt_picture"
+        app:layout_constraintEnd_toEndOf="@+id/btnPickPicture"
         app:layout_constraintStart_toEndOf="@+id/cvProfile"
+        app:layout_constraintStart_toStartOf="@+id/btnPickPicture"
         app:layout_constraintTop_toTopOf="@+id/cvProfile" />
 
     <Button
         android:id="@+id/btnPickPicture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_20sdp"
         android:text="@string/pick_a_picture_from_gallery"
         app:layout_constraintBottom_toBottomOf="@+id/cvProfile"
-        app:layout_constraintStart_toStartOf="@+id/btnTakePicture" />
+        app:layout_constraintStart_toEndOf="@+id/cvProfile" />
 
     <TextView
         android:id="@+id/tvFullname"
